@@ -1,5 +1,5 @@
  int charger = 2;
- int kicker = 48;
+ int kicker = 4;
 
 // the setup routine runs once when you press reset:
 void setup() {                
