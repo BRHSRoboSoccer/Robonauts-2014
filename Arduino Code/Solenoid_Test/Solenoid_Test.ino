@@ -15,6 +15,6 @@ void loop() {
   digitalWrite(kicker,LOW);
   delay(2000);
   digitalWrite(charger, HIGH);
-  delay(10000);
+  delay(18000);
   digitalWrite(charger, LOW);
 }

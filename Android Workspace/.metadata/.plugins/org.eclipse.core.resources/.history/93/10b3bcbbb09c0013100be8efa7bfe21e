@@ -48,48 +48,26 @@ public class MainActivity extends Activity {
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 		filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
 		registerReceiver(mUsbReceiver, filter);  
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.main);
 		textView = (TextView) findViewById(R.id.textView); 
+		setContentView(R.layout.activity_main);
 	}
 
-	/** Called when the activity is resumed from its paused state and immediately after onCreate(). */
-	@Override public void onResume() {
-		super.onResume();
-		if (mInputStream != null && mOutputStream != null) {
-			return;
-		}  
-		UsbAccessory[] accessories = mUsbManager.getAccessoryList();
-		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
-		if (accessory != null) {
-			if (mUsbManager.hasPermission(accessory)) {
-				openAccessory(accessory);
-				}
-			else {
-				synchronized (mUsbReceiver) {
-					if (!mPermissionRequestPending) {
-						mUsbManager.requestPermission(accessory, mPermissionIntent);
-						mPermissionRequestPending = true;
-						}
-					}
-				}
-			}
-		else {
-			Log.d(TAG, "mAccessory is null");
-		}
-	} 
-	
-	/** Called when the activity is paused by the system. */
-	@Override public void onPause() { 
-		 super.onPause();
-		 closeAccessory();
-	 }  
-	
-	/** Called when the activity is no longer needed prior to being removed from the activity stack. */
-	@Override public void onDestroy() {
-		super.onDestroy();
-		unregisterReceiver(mUsbReceiver);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		mUsbManager = UsbManager.getInstance(this);
+		mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
+				ACTION_USB_PERMISSION), 0);
+		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+		filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+		registerReceiver(mUsbReceiver, filter);  
+		setContentView(R.layout.main);
+		textView = (TextView) findViewById(R.id.textView); 
+		setContentView(R.layout.activity_main);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
