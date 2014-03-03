@@ -1,13 +1,13 @@
 /* 
-* This is V1 of the final code for the Robonauts
-* This serves solely as a communicator between the Input/Output and the Android Phone
-*/
+ * This is V1 of the final code for the Robonauts
+ * This serves solely as a communicator between the Input/Output and the Android Phone
+ */
 
 /*
 *
-* INCLUDE STATEMENTS
-*
-*/
+ * INCLUDE STATEMENTS
+ *
+ */
 
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
@@ -18,9 +18,9 @@
 
 /*
 *
-* DEFINING PINS
-*
-*/
+ * DEFINING PINS
+ *
+ */
 
 #define TRIGGER_PIN_FRONT  14  // Arduino pin tied to trigger pin on the FRONT facing ultrasonic sensor.
 #define ECHO_PIN_FRONT     15  // Arduino pin tied to echo pin on the FRONT facing ultrasonic sensor.
@@ -39,14 +39,15 @@ int dribblerSwitch = 24;
 
 int lightSensor = A0;
 
-int IRSensor[14] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};  //Setup Array for IR Sensors
+int IRSensor[14] = {
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};  //Setup Array for IR Sensors
 
 
 /*
 *
-* SETUP ANDROID ACCESSORY
-*
-*/
+ * SETUP ANDROID ACCESSORY
+ *
+ */
 
 AndroidAccessory acc("BRHS RoboSoccer", "RobotCode", "Final code for the Arudino", "1.0", "www.brhsrobosoccer.com", "Serial");  // setup Arduino as Android Accessory
 
@@ -59,9 +60,9 @@ byte sntmsg[3 + ARRAY_SIZE];
 
 /*
 *
-* SETUP SENSORS
-*
-*/
+ * SETUP SENSORS
+ *
+ */
 
 NewPing sonarFront(TRIGGER_PIN_FRONT, ECHO_PIN_FRONT, MAX_DISTANCE); // NewPing setup of pins and maximum distance for front US Sensor.
 NewPing sonarLeft(TRIGGER_PIN_LEFT, ECHO_PIN_LEFT, MAX_DISTANCE); // NewPing setup of pins and maximum distance for left US Sensor.
@@ -79,9 +80,9 @@ Adafruit_DCMotor *backMotor = AFMS.getMotor(3);
 
 /*
 *
-* SETUP GLOABAL VARIABLES TO STORE SENSOR DATA
-*
-*/
+ * SETUP GLOABAL VARIABLES TO STORE SENSOR DATA
+ *
+ */
 
 unsigned int USValueFront; //Setup Variable for the data from the front US Sensor
 unsigned int USValueLeft; //Setup Variable for the data from the left US Sensor
@@ -109,23 +110,23 @@ void setup() {
 
 void loop() {
   if (acc.isConnected()) { 
-    
+
     //Get Sensor Data
     getIRData();
     getUSData();
     getLightData();
-    
+
     //Fill Communcication Array
     fillSntMsg();
     acc.write(sntmsg, 3 + ARRAY_SIZE); 
-    
-    
+
+
     //Read incoming message
     readRcvMsg();
-    
+
     //Output motors
     driveRobot();
-    
+
     //Output Dribbler
     if(dribblerOn == 1){
       digitalWrite(dribblerSwitch, HIGH);
@@ -133,7 +134,7 @@ void loop() {
     else{
       digitalWrite(dribblerSwitch, LOW);
     }
-    
+
     //Output Kicker
     if(dribblerOn == kickerKick){
       kickBall();
@@ -143,19 +144,19 @@ void loop() {
 
 void readRcvMsg(){
   int len = acc.read(rcvmsg, sizeof(rcvmsg), 1);
-    if (len > 0) {
-      if (rcvmsg[0] == COMMAND_TEXT) {
-        if (rcvmsg[1] == TARGET_DEFAULT){         //get the textLength from the checksum byte
-          if(rcvmsg[2] == 8){
-            leftMotorPower = rcvmsg[3];
-            rightMotorPower = rcvmsg[4];
-            backMotorPower = rcvmsg[5];
-            dribblerOn = rcvmsg[6];
-            kickerKick = rcvmsg[7];
-          }
+  if (len > 0) {
+    if (rcvmsg[0] == COMMAND_TEXT) {
+      if (rcvmsg[1] == TARGET_DEFAULT){         //get the textLength from the checksum byte
+        if(rcvmsg[2] == 8){
+          leftMotorPower = rcvmsg[3];
+          rightMotorPower = rcvmsg[4];
+          backMotorPower = rcvmsg[5];
+          dribblerOn = rcvmsg[6];
+          kickerKick = rcvmsg[7];
         }
-      }   
-    }
+      }
+    }   
+  }
 }
 
 
@@ -164,27 +165,27 @@ void fillSntMsg(){
   sntmsg[0] = COMMAND_TEXT;
   sntmsg[1] = TARGET_DEFAULT;
   sntmsg[2] = ARRAY_SIZE; 
-  
+
   //Fill IR Values
-   for(int i = 0; i < 15; i++) {
-     sntmsg[3 + i] = irValue[i]; 
-   }
-   
-   //Fill US Values  
-   sntmsg[18] = USValueFront;
-   sntmsg[19] = USValueLeft;
-   sntmsg[20] = USValueBack;
-   sntmsg[21] = USValueRight;
-   
-   //Fill Light Sensor Values
-   sntmsg[22] = lightValue;
+  for(int i = 0; i < 15; i++) {
+    sntmsg[3 + i] = irValue[i]; 
+  }
+
+  //Fill US Values  
+  sntmsg[18] = USValueFront;
+  sntmsg[19] = USValueLeft;
+  sntmsg[20] = USValueBack;
+  sntmsg[21] = USValueRight;
+
+  //Fill Light Sensor Values
+  sntmsg[22] = lightValue;
 }
 
 void getIRData(){
   for(int j = 0; j<14; j++){  //wipe all previous data from last cycle
     irValue[j] = 0;
   }
-  
+
   for(int i=0; i<10;i++){  // Get 10 samples per cycle
     for(int j = 0; j<14; j++){  // Get samples from all 14 sensors
       irValue[j] += digitalRead(IRSensor[j]);
@@ -229,7 +230,7 @@ void driveRobot(){
     leftMotorPower *= -1;
   }
   leftMotor->setSpeed(leftMotorPower);
-  
+
   if(rightMotorPower==0){
     rightMotor->run(RELEASE);
   }
@@ -241,7 +242,7 @@ void driveRobot(){
     rightMotorPower *= -1;
   }
   rightMotor->setSpeed(rightMotorPower);
-  
+
   if(leftMotorPower==0){
     backMotor->run(RELEASE);
   }
@@ -254,3 +255,4 @@ void driveRobot(){
   }
   backMotor->setSpeed(backMotorPower);
 }
+
