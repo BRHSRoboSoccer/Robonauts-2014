@@ -7,14 +7,15 @@ void setup() {
   Serial.begin(9600);
   // make the pushbutton's pin an input:
   pinMode(irPin, INPUT);
+  Serial.println("Here we go");
 }
 
 // the loop routine runs over and over again forever:
 void loop() {
   // read the input pin:
-  for(int i=0; i<20;i++){
+  for(int i=0; i<200;i++){
     irValue += digitalRead(irPin);
-    delay(50);
+    delay(5);
   }
   Serial.println(irValue);
   irValue = 0;
