@@ -1,9 +1,10 @@
 /* 
- * This is V1 of the final code for the Robosquids
+ * This is V1 of the final code for the Robonauts
+ * This serves solely as a communicator between the Input/Output and the Android Phone
  */
 
 /*
- *
+*
  * INCLUDE STATEMENTS
  *
  */
@@ -31,22 +32,13 @@
 #define ECHO_PIN_RIGHT     21// Arduino pin tied to echo pin on the RIGHT facing ultrasonic sensor.
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
-int HMC6352Address = 0x42;
-int slaveAddress;
-byte headingData[2];
-int headingValue;
-
 int solenoidCharger = 22;
 int solenoidKicker = 23;
 
 int dribblerSwitch = 24;
 
 int leftLightSensor = A0;
-int rightLightSensor = A1;
-
-int photogate = A3;
-
-int laser = 44;
+int leftLightSensor = A0;
 
 
 int IRSensor[14] = {
@@ -55,12 +47,24 @@ int IRSensor[14] = {
 
 /*
 *
- * SETUP SENSORS
+ * SETUP ANDROID ACCESSORY
  *
  */
 
+AndroidAccessory acc("BRHS RoboSoccer", "RobotCode", "Final code for the Arudino", "1.0", "www.brhsrobosoccer.com", "Serial");  // setup Arduino as Android Accessory
 
-int light_threshold =  50;
+#define ARRAY_SIZE 20
+#define COMMAND_TEXT 0xF
+#define TARGET_DEFAULT 0xF 
+
+byte rcvmsg[8];
+byte sntmsg[3 + ARRAY_SIZE]; 
+
+/*
+*
+ * SETUP SENSORS
+ *
+ */
 
 NewPing sonarFront(TRIGGER_PIN_FRONT, ECHO_PIN_FRONT, MAX_DISTANCE); // NewPing setup of pins and maximum distance for front US Sensor.
 NewPing sonarLeft(TRIGGER_PIN_LEFT, ECHO_PIN_LEFT, MAX_DISTANCE); // NewPing setup of pins and maximum distance for left US Sensor.
@@ -89,100 +93,94 @@ unsigned int USValueRight; //Setup Variable for the data from the right US Senso
 
 int irValue[14];  //Setup Array to hold values of all IR Sensors
 
-int leftLightValue = 0;
-int rightLightValue = 0;
+int lightValue = 0;
 
 int leftMotorPower;
 int rightMotorPower;
 int backMotorPower;
 
-int initialCompass;
-int absoluteCompass;
-int relativeCompass;
-
 int dribblerOn = 0;
 int kickerKick = 0;
 
-int haveBall = 0;
 
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
-  initializeCompass();  
-  Wire.begin();
-  digitalWrite(laser, HIGH);
+  acc.powerOn();
+  AFMS.begin();  // create with the default frequency 1.6KHz 
 }
 
 void loop() {
-  //Get Sensor Data
-  getIRData();
-  getUSData();
-  getLightData();
-  getCompassReading();
-  checkHasBall();
-  
-  
-  //Output motors
-  driveRobot();
+  if (acc.isConnected()) { 
 
-  //Output Dribbler
-  if(dribblerOn == 1){
-    digitalWrite(dribblerSwitch, HIGH);
-  }
-  else{
-    digitalWrite(dribblerSwitch, LOW);
-  }
+    //Get Sensor Data
+    getIRData();
+    getUSData();
+    getLightData();
 
-  //Output Kicker
-  if(dribblerOn == kickerKick){
-    kickBall();
+    //Fill Communcication Array
+    fillSntMsg();
+    acc.write(sntmsg, 3 + ARRAY_SIZE); 
+
+
+    //Read incoming message
+    readRcvMsg();
+
+    //Output motors
+    driveRobot();
+
+    //Output Dribbler
+    if(dribblerOn == 1){
+      digitalWrite(dribblerSwitch, HIGH);
+    }
+    else{
+      digitalWrite(dribblerSwitch, LOW);
+    }
+
+    //Output Kicker
+    if(dribblerOn == kickerKick){
+      kickBall();
+    }
   }
 }
 
-void checkHasBall(){
-  if(digitalRead(photogate) > 150){
-    haveBall = 0;
-  }
-  else{
-    haveBall = 1;
+void readRcvMsg(){
+  int len = acc.read(rcvmsg, sizeof(rcvmsg), 1);
+  if (len > 0) {
+    if (rcvmsg[0] == COMMAND_TEXT) {
+      if (rcvmsg[1] == TARGET_DEFAULT){         //get the textLength from the checksum byte
+        if(rcvmsg[2] == 8){
+          leftMotorPower = rcvmsg[3];
+          rightMotorPower = rcvmsg[4];
+          backMotorPower = rcvmsg[5];
+          dribblerOn = rcvmsg[6];
+          kickerKick = rcvmsg[7];
+        }
+      }
+    }   
   }
 }
 
-void initializeCompass(){
-  slaveAddress = HMC6352Address >> 1;   // This results in 0x21 as the address to pass to TWI
-  Wire.beginTransmission(slaveAddress);
-  Wire.write("A");              // The "Get Data" command
-  Wire.endTransmission();
-  delay(10);                   // The HMC6352 needs at least a 70us (microsecond) delay
-  // after this command.  Using 10ms just makes it safe
-  // Read the 2 heading bytes, MSB first
-  // The resulting 16bit word is the compass heading in 10th's of a degree
-  // For example: a heading of 1345 would be 134.5 degrees
-  Wire.requestFrom(slaveAddress, 2);        // Request the 2 byte heading (MSB comes first)
-  for(int w =0; Wire.available() && w < 2; w++){ 
-    headingData[w] = Wire.read();
-  }
-  headingValue = headingData[0]*256 + headingData[1];  // Put the MSB and LSB together
-  initialCompass = headingValue / 10;
-}
 
-void getCompassReading(){
-  Wire.beginTransmission(slaveAddress);
-  Wire.write("A");              // The "Get Data" command
-  Wire.endTransmission();
-  delay(10);                   // The HMC6352 needs at least a 70us (microsecond) delay
-  // after this command.  Using 10ms just makes it safe
-  // Read the 2 heading bytes, MSB first
-  // The resulting 16bit word is the compass heading in 10th's of a degree
-  // For example: a heading of 1345 would be 134.5 degrees
-  Wire.requestFrom(slaveAddress, 2);        // Request the 2 byte heading (MSB comes first)
-  for(int w =0; Wire.available() && w < 2; w++)
-  { 
-    headingData[w] = Wire.read();
+void fillSntMsg(){
+  //Communication protocol
+  sntmsg[0] = COMMAND_TEXT;
+  sntmsg[1] = TARGET_DEFAULT;
+  sntmsg[2] = ARRAY_SIZE; 
+
+  //Fill IR Values
+  for(int i = 0; i < 15; i++) {
+    sntmsg[3 + i] = irValue[i]; 
   }
-  headingValue = headingData[0]*256 + headingData[1];  // Put the MSB and LSB together
-  absoluteCompass = headingValue / 10;
-  relativeCompass = absoluteCompass - initialCompass;
+
+  //Fill US Values  
+  sntmsg[18] = USValueFront;
+  sntmsg[19] = USValueLeft;
+  sntmsg[20] = USValueBack;
+  sntmsg[21] = USValueRight;
+
+  //Fill Light Sensor Values
+  sntmsg[22] = lightValue;
 }
 
 void getIRData(){
@@ -210,8 +208,7 @@ void getUSData(){
 }
 
 void getLightData(){
-  leftLightValue = analogRead(leftLightSensor);
-  rightLightValue = analogRead(rightLightSensor);
+  lightValue = analogRead(lightSensor);
 }
 
 void kickBall(){
