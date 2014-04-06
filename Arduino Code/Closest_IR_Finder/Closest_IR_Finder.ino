@@ -5,20 +5,20 @@ void setup(){
   Serial.begin(9600);
   
   //Setup Array for IR Sensors
-  IRSensor[0]  = 14;
-  IRSensor[1]  = 15;
-  IRSensor[2]  = 16;
-  IRSensor[3]  = 17;
-  IRSensor[4]  = 18;
-  IRSensor[5]  = 19;
-  IRSensor[6]  = 20;
-  IRSensor[7]  = 21;
-  IRSensor[8]  = 5;
-  IRSensor[9]  = 4;
-  IRSensor[10] = 3;
-  IRSensor[11] = 2;
-  IRSensor[12] = 1;
-  IRSensor[13] = 0;
+  IRSensor[0]  = 7;
+  IRSensor[1]  = 6;
+  IRSensor[2]  = 5;
+  IRSensor[3]  = 4;
+  IRSensor[4]  = 3;
+  IRSensor[5]  = 2;
+  IRSensor[6]  = 1;
+  IRSensor[7]  = 0;
+  IRSensor[8]  = 8;
+  IRSensor[9]  = 9;
+  IRSensor[10] = 10;
+  IRSensor[11] = 11;
+  IRSensor[12] = 12;
+  IRSensor[13] = 13;
   
   Serial.println("Here we go");
 }
