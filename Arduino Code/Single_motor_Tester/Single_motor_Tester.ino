@@ -23,10 +23,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 
 // And connect a DC motor to port M1
-Adafruit_DCMotor *leftMotor = AFMS.getMotor(1);
-Adafruit_DCMotor *backMotor = AFMS.getMotor(4);
-Adafruit_DCMotor *rightMotor = AFMS.getMotor(3);
-
+Adafruit_DCMotor *dribbler = AFMS.getMotor(2);
 // We'll also test out the built in Arduino Servo library
 
 
@@ -38,28 +35,11 @@ void setup() {
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
    
   // turn on motor M1
-  backMotor->setSpeed(75);
-  backMotor->run(RELEASE);
-
-  rightMotor->setSpeed(25);
-  rightMotor->run(RELEASE);
-
-  leftMotor->setSpeed(25);
-  leftMotor->run(RELEASE);
-  
-  backMotor->run(FORWARD);
-  leftMotor->run(BACKWARD);
-  rightMotor->run(BACKWARD);
-    
-    delay(5000);
-    
-  backMotor->run(RELEASE);
-
-  rightMotor->run(RELEASE);
-
-  leftMotor->run(RELEASE);
+  dribbler->setSpeed(200);
+  dribbler->run(RELEASE);
 }
 
-int i;
 void loop() {
+  dribbler->setSpeed(100);
+  dribbler->run(FORWARD);
 }
