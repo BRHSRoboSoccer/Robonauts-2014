@@ -25,9 +25,9 @@ int movement[10][4] =
 {33, 33, -67},
 {64, -17, -47},
 {58, -58, 0},
-{14, -64, 47}
-{-33, -33, 67}
-{-64, 17, 47}
+{30, -64, 47},
+{-33, -33, 67},
+{-64, 17, 47},
 {33, 33, 33},
 {-33, -33, -33}};
 
@@ -56,36 +56,30 @@ void setup() {
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
    
-  // turn on motor M1
-  backMotor->setSpeed(75);
+  // turn on motor M1  
   backMotor->run(RELEASE);
 
-  rightMotor->setSpeed(25);
   rightMotor->run(RELEASE);
 
-  leftMotor->setSpeed(25);
   leftMotor->run(RELEASE);
   
-  backMotor->run(FORWARD);
-  leftMotor->run(BACKWARD);
-  rightMotor->run(BACKWARD);
-    
-    delay(5000);
-    
-  backMotor->run(RELEASE);
-
-  rightMotor->run(RELEASE);
-
-  leftMotor->run(RELEASE);
+  chooseMovement(5, 170);
+  
+  driveRobot();
+  
+  delay(5000);
 }
 
 void loop() {
   
-  for(int i =0; i < 20; i++){
+  
+  
+  
+  /*for(int i =0; i < 20; i++){
     resetIRSensors();
     readIRSensors();
     findMaxIR();
-  }
+  }*/
   
 }
 
