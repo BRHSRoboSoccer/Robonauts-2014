@@ -3,6 +3,7 @@
 #include "utility/Adafruit_PWMServoDriver.h"
 #include <Servo.h> 
 
+
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 // Or, create it with a different I2C address (say for stacking)
@@ -19,23 +20,23 @@ int leftMotorPower;
 int rightMotorPower;
 int backMotorPower;
 
-int chosenDirection;
-
-int maxIR;
-
-int movement[11][3] = 
-{{-58, 58, 0},
-{-17, 64, -47},
+int movement[11][4] = 
+{{-61, 58, 0},
+{-35, 64, -47},
 {33, 33, -67},
-{64, -17, -47},
-{58, -58, 0},
-{30, -64, 47},
+{64, -35, -47},
+{61, -58, 0},
+{35, -64, 47},
 {-33, -33, 67},
-{-64, 17, 47},
+{-64, 35, 47},
 {33, 33, 33},
-{-33, -33, -33},
+{-33, -33, -33}
 {0, 0, 0}};
 
+
+int initialCompass;
+int absoluteCompass;
+int relativeCompass;
 
 
 void setup() {
@@ -43,21 +44,23 @@ void setup() {
   Serial.println("MMMMotor party!");
 
   //Setup Array for IR Sensors
-  IRSensor[0]  = 19;
-  IRSensor[1]  = 18;
-  IRSensor[2]  = 17;
-  IRSensor[3]  = 16;
-  IRSensor[4]  = 15;
-  IRSensor[5]  = 14;
-  IRSensor[6]  = 29;
-  IRSensor[7]  = 31;
-  IRSensor[8]  = 33;
-  IRSensor[9]  = 35;
-  IRSensor[10] = 37;
-  IRSensor[11] = 39;
-  IRSensor[12] = 41;
-  IRSensor[13] = 43;
-  
+  IRSensor[0]  = 7;
+  IRSensor[1]  = 6;
+  IRSensor[2]  = 5;
+  IRSensor[3]  = 4;
+  IRSensor[4]  = 3;
+  IRSensor[5]  = 2;
+  IRSensor[6]  = 1;
+  IRSensor[7]  = 0;
+  IRSensor[8]  = 8;
+  IRSensor[9]  = 9;
+  IRSensor[10] = 10;
+  IRSensor[11] = 11;
+  IRSensor[12] = 12;
+  IRSensor[13] = 13;
+
+  initializeCompass();
+
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
    
@@ -67,64 +70,22 @@ void setup() {
   rightMotor->run(RELEASE);
 
   leftMotor->run(RELEASE);
-  
-  for(int i = 0; i<20; i++){
-    resetIRSensors();
-    readIRSensors();
-    findMaxIR();
-    switch(maxIR){
-      case 0: chosenDirection = 0;
-              break;
-      case 1: chosenDirection = 0;
-              break;
-      case 2: chosenDirection = 1;
-              break;
-      case 3: chosenDirection = 2;
-              break;
-      case 4: chosenDirection = 3;
-              break;
-      case 5: chosenDirection = 4;
-              break;
-      case 6: chosenDirection = 5;
-              break;
-      case 7: chosenDirection = 5;
-              break;
-      case 8: chosenDirection = 6;
-              break;
-      case 9: chosenDirection = 4;
-              break;
-      case 10: chosenDirection = 5;
-              break;
-      case 11: chosenDirection = 6;
-              break;
-      case 12: chosenDirection = 0;
-              break;
-      case 13: chosenDirection = 0;
-              break;
-      case 14: chosenDirection = 10;
-              break;
-    }
-    
-    chooseMovement(chosenDirection, 170);
-    
-    driveRobot();
-  }
-  chooseMovement(10, 0);
-    
-  driveRobot();
 }
 
 void loop() {
-  
-  
-  
-  
-  /*for(int i =0; i < 20; i++){
-    resetIRSensors();
-    readIRSensors();
-    findMaxIR();
-  }*/
-  
+  getCompassReading();
+  if(relativeCompass > 15 && <180){
+    chooseMovement(10, 70);
+    driveRobot();
+  }
+  else if(relativeCompass > 180 && <345){
+    chooseMovement(11, 70);
+    driveRobot();
+  }
+  else{
+    chooseMovement(12, 0);
+    driveRobot();
+  }
 }
 
 void chooseMovement(int dir, int spe){
@@ -151,14 +112,11 @@ void readIRSensors(){
 }
 
 void findMaxIR(){
- maxIR = 0;
+  int maxIR = 0;
   for(int i = 1; i<14; i++){
-    if(IRData[1][i] < IRData[1][maxIR] && IRData[1][i] < 200){
+    if(IRData[1][i] < IRData[1][maxIR]){
       maxIR = IRData[0][i];
     }
-  }
-  if(IRData[1][maxIR] ==200){
-    maxIR = 14;
   }
   Serial.println(maxIR);
 }
@@ -188,7 +146,7 @@ void driveRobot(){
   }
   rightMotor->setSpeed(rightMotorPower);
 
-  if(backMotorPower==0){
+  if(leftMotorPower==0){
     backMotor->run(RELEASE);
   }
   else if(backMotorPower > 0){

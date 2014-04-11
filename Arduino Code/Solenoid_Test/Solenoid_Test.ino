@@ -1,5 +1,5 @@
- int charger = 2;
- int kicker = 4;
+ int charger = 25;
+ int kicker = 24;
 
 // the setup routine runs once when you press reset:
 void setup() {                
@@ -15,6 +15,7 @@ void loop() {
   digitalWrite(kicker,LOW);
   delay(2000);
   digitalWrite(charger, HIGH);
-  delay(18000);
+  delay(10000);
   digitalWrite(charger, LOW);
+  delay(1000);
 }

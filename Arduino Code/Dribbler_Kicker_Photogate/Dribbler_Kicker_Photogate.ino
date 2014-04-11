@@ -26,21 +26,40 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *dribbler = AFMS.getMotor(2);
 // We'll also test out the built in Arduino Servo library
 
+ int charger = 25;
+ int kicker = 24;
+
+int LDR_Pin = A10; //analog pin 1
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println("MMMMotor party!");
+  Serial.println("Here We Go!");
+
+  pinMode(charger, OUTPUT);
+  pinMode(kicker, OUTPUT);
 
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
    
   // turn on motor M1
-  dribbler->setSpeed(200);
-  dribbler->run(RELEASE);
-  
+  dribbler->setSpeed(160);
+  dribbler->run(FORWARD);
+  digitalWrite(charger, HIGH);
+  delay(7000);
+  digitalWrite(charger, LOW);
 }
 
 void loop() {
-  dribbler->setSpeed(100);
-  dribbler->run(RELEASE);
+  if(analogRead(LDR_Pin) < 450){
+    delay(500);
+    dribbler->setSpeed(20);
+    delay(750);
+    digitalWrite(kicker,HIGH);
+    delay(500);
+    digitalWrite(kicker,LOW);
+    dribbler->setSpeed(100);
+    digitalWrite(charger, HIGH);
+    delay(12000);
+    digitalWrite(charger, LOW);
+  } 
 }
