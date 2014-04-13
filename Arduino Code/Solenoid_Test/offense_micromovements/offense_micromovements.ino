@@ -37,7 +37,7 @@ int slaveAddress;
 byte headingData[2];
 int headingValue;
 
-int kicker = 24;
+//int kicker = 24;
 int charger = 25;
 
 int leftLightSensor = A8;
@@ -106,18 +106,18 @@ int leftMotorPower;
 int rightMotorPower;
 int backMotorPower;
 
-int initialCompass;
-int absoluteCompass;
-int relativeCompass;
+//int initialCompass;
+//int absoluteCompass;
+//int relativeCompass;
 
 int dribblerOn = 0;
-int kickerKick = 0;
+//int kickerKick = 0;
 
 int motorsOn;
 
 int chosenDirection;
 
-int chargeTimer = 0;
+//int chargeTimer = 0;
 
 int maxIR;
 
@@ -126,7 +126,7 @@ int haveBall = 0;
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
-  initializeCompass();  
+  //initializeCompass();  
   Wire.begin();
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
@@ -162,13 +162,13 @@ void loop() {
     
   getUSData();
   getLightData();
-  getCompassReading();
+  //getCompassReading();
   checkHasBall();
   getMotorOnSwitch();
   
   makeDecision();
   
-  checkChargeTimer();
+  //checkChargeTimer();
   
   //Output motors
   driveRobot();
@@ -187,13 +187,13 @@ void makeDecision(){
   else{
     dribbler->run(FORWARD); 
     dribbler->setSpeed(60);
-    if(relativeCompass > 50 && relativeCompass <= 180 ){
+    /*if(relativeCompass > 50 && relativeCompass <= 180 ){
       chooseMovement(8, 120);
     }
     else if(relativeCompass > 180 && relativeCompass <310){
       chooseMovement(9, 120);
-    }
-    else{
+    }*/
+    //else{
       if(haveBall == 0){
         if(USValueBack < 50){
           chooseMovement(0, 150);
@@ -263,18 +263,18 @@ void makeDecision(){
           else{
             dribbler->setSpeed(20);
             delay(200);
-            digitalWrite(kicker,HIGH);
+            //digitalWrite(kicker,HIGH);
             delay(500);
-            digitalWrite(kicker,LOW);
-            chargeTimer = 32;
+            //digitalWrite(kicker,LOW);
+            //chargeTimer = 32;
           }
         }
       }
     }
   }    
-}
+
   
-void checkChargeTimer(){
+/*void checkChargeTimer(){
   if(chargeTimer>0){
     digitalWrite(charger, HIGH);
     charger--;
@@ -282,7 +282,7 @@ void checkChargeTimer(){
   else{
     digitalWrite(charger, LOW);
   }
-}
+}*/
 
 void resetIRSensors(){
   for(int i = 0; i<14; i++){
@@ -325,7 +325,7 @@ void checkHasBall(){
   }
 }
 
-void initializeCompass(){
+/*void initializeCompass(){
   slaveAddress = HMC6352Address >> 1;   // This results in 0x21 as the address to pass to TWI
   Wire.beginTransmission(slaveAddress);
   Wire.write("A");              // The "Get Data" command
@@ -342,7 +342,7 @@ void initializeCompass(){
   headingValue = headingData[0]*256 + headingData[1];  // Put the MSB and LSB together
   initialCompass = headingValue / 10;
 }
-
+*/
 void getMotorOnSwitch(){
   if(analogRead(motorStopper) > MOTOR_SWITCH_THRESHHOLD){
     motorsOn = 1;
@@ -353,7 +353,7 @@ void getMotorOnSwitch(){
 }
     
   
-void getCompassReading(){
+/*void getCompassReading(){
   Wire.beginTransmission(slaveAddress);
   Wire.write("A");              // The "Get Data" command
   Wire.endTransmission();
@@ -373,7 +373,7 @@ void getCompassReading(){
   Serial.print("Compass:  ");
   Serial.println(relativeCompass);
 }
-
+*/
 
 void getUSData(){
   USValueLeft = sonarLeft.ping(); // Send ping, get ping time in microseconds (uS).

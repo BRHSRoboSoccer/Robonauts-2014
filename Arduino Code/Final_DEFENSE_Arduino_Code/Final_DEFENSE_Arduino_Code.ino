@@ -23,7 +23,7 @@
 
 
 #define MOTOR_SWITCH_THRESHHOLD   1005
-#define LIGHT_BARRIER_THRESHHOLD  200
+#define LIGHT_BARRIER_THRESHHOLD  700
 #define TRIGGER_PIN_LEFT  36  // Arduino pin tied to trigger pin on the LEFT facing ultrasonic sensor.
 #define ECHO_PIN_LEFT     38  // Arduino pin tied to echo pin on the LEFT facing ultrasonic sensor.
 #define TRIGGER_PIN_BACK  32  // Arduino pin tied to trigger pin on the BACK facing ultrasonic sensor.
@@ -82,11 +82,11 @@ int movement[11][3] =
 {{-58, 58, 0},  //forward
 {-17, 64, -47},  //forward right
 {33, 33, -67},  //right
-{64, -17, -47},
+{55, -17, -47},
 {58, -58, 0},
 {30, -64, 47},
 {-33, -33, 67},
-{-64, 17, 47},
+{-55, 17, 47},
 {33, 33, 33},
 {-33, -33, -33},
 {0, 0, 0}};
@@ -117,7 +117,7 @@ int motorsOn;
 
 int chosenDirection;
 
-int chargeTimer = 0;
+int chargeTimer = 32;
 
 int maxIR;
 
@@ -186,53 +186,53 @@ void makeDecision(){
   }
   else{
     dribbler->run(FORWARD); 
-    dribbler->setSpeed(60);
+    dribbler->setSpeed(100);
     if(haveBall == 0){
-      if(USValueBack < 50){
-        chooseMovement(0, 150);
-          Serial.print("Back US: ");
-          Serial.println(USValueBack);
+      if(USValueRight < 61){
+        chooseMovement(6, 150);
+          Serial.print("Right US: ");
+          Serial.println(USValueRight);
+      }
+      else if(USValueRight > 121){
+        chooseMovement(2, 150);
+          Serial.print("Right US: ");
+          Serial.println(USValueRight);
       }
       else{
-        if(leftLightValue > 1023){
-          chooseMovement(2, 150);
-          Serial.print("Left Light: ");
-          Serial.println(leftLightValue);
-        }
-        else if(rightLightValue > 1023){
-          chooseMovement(6, 150);
-          Serial.print("Right Light: ");
-          Serial.println(rightLightValue);
+        if(USValueBack > 35){
+          chooseMovement(4, 150);
+          Serial.print("Back US: ");
+          Serial.println(USValueBack);
         }
         else{
           switch(maxIR){
-            case 0: chosenDirection = 0;
+            case 0: chosenDirection = 10;
                     break;
-            case 1: chosenDirection = 0;
+            case 1: chosenDirection = 10;
                     break;
-            case 2: chosenDirection = 1;
+            case 2: chosenDirection = 2;
                     break;
             case 3: chosenDirection = 2;
                     break;
-            case 4: chosenDirection = 3;
+            case 4: chosenDirection = 2;
                     break;
-            case 5: chosenDirection = 4;
+            case 5: chosenDirection = 2;
                     break;
-            case 6: chosenDirection = 5;
+            case 6: chosenDirection = 2;
                     break;
-            case 7: chosenDirection = 5;
+            case 7: chosenDirection = 0;
                     break;
             case 8: chosenDirection = 6;
                     break;
-            case 9: chosenDirection = 4;
+            case 9: chosenDirection = 6;
                     break;
-            case 10: chosenDirection = 5;
+            case 10: chosenDirection = 6;
                     break;
             case 11: chosenDirection = 6;
                     break;
-            case 12: chosenDirection = 0;
+            case 12: chosenDirection = 6;
                     break;
-            case 13: chosenDirection = 0;
+            case 13: chosenDirection = 10;
                     break;
             case 14: chosenDirection = 10;
                     break;
@@ -242,26 +242,14 @@ void makeDecision(){
       }
     }
     else{
+      chooseMovement(chosenDirection, 0);
       Serial.println("I has ball.");
-      if(USValueLeft < 61){
-        chooseMovement(1, 150);
-      }
-      else if(USValueRight < 61){
-        chooseMovement(7, 150);
-      }
-      else{
-        if(USValueBack < 1000){
-          chooseMovement(0, 150);
-        }
-        else{
-          dribbler->setSpeed(20);
-          delay(200);
-          digitalWrite(kicker,HIGH);
-          delay(500);
-          digitalWrite(kicker,LOW);
-          chargeTimer = 32;
-        }
-      }
+      dribbler->setSpeed(20);
+      delay(200);
+      digitalWrite(kicker,HIGH);
+      delay(500);
+      digitalWrite(kicker,LOW);
+      chargeTimer = 32;
     }
   }    
 }
