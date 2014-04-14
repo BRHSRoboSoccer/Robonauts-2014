@@ -50,7 +50,7 @@ void setup() {
 }
 
 void loop() {
-  if(analogRead(LDR_Pin) < 450){
+  if(analogRead(LDR_Pin) < 280){
     delay(500);
     dribbler->setSpeed(20);
     delay(750);

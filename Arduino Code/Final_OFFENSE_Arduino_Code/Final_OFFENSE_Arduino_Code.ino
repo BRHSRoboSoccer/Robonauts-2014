@@ -22,8 +22,8 @@
  */
 
 
-#define MOTOR_SWITCH_THRESHHOLD   1005
-#define LIGHT_BARRIER_THRESHHOLD  200
+#define MOTOR_SWITCH_THRESHHOLD   1000
+#define LIGHT_BARRIER_THRESHHOLD  280
 #define TRIGGER_PIN_LEFT  36  // Arduino pin tied to trigger pin on the LEFT facing ultrasonic sensor.
 #define ECHO_PIN_LEFT     38  // Arduino pin tied to echo pin on the LEFT facing ultrasonic sensor.
 #define TRIGGER_PIN_BACK  32  // Arduino pin tied to trigger pin on the BACK facing ultrasonic sensor.
@@ -186,7 +186,7 @@ void makeDecision(){
   }
   else{
     dribbler->run(FORWARD); 
-    dribbler->setSpeed(60);
+    dribbler->setSpeed(120);
     if(relativeCompass > 50 && relativeCompass <= 180 ){
       chooseMovement(8, 120);
     }
@@ -244,7 +244,7 @@ void makeDecision(){
               case 14: chosenDirection = 10;
                       break;
             }
-            chooseMovement(chosenDirection, 150);
+            chooseMovement(chosenDirection, 200);
           }
         }
       }
@@ -257,7 +257,7 @@ void makeDecision(){
           chooseMovement(7, 150);
         }
         else{
-          if(USValueBack < 1000){
+          if(USValueBack < 100){
             chooseMovement(0, 150);
           }
           else{
@@ -267,6 +267,8 @@ void makeDecision(){
             delay(500);
             digitalWrite(kicker,LOW);
             chargeTimer = 32;
+            delay(20);
+            digitalWrite(charger, HIGH);
           }
         }
       }
@@ -275,13 +277,10 @@ void makeDecision(){
 }
   
 void checkChargeTimer(){
-  if(chargeTimer>0){
-    digitalWrite(charger, HIGH);
-    charger--;
+  if(chargeTimer==0){
+      digitalWrite(charger, LOW);
   }
-  else{
-    digitalWrite(charger, LOW);
-  }
+  charger--;
 }
 
 void resetIRSensors(){
@@ -369,7 +368,7 @@ void getCompassReading(){
   }
   headingValue = headingData[0]*256 + headingData[1];  // Put the MSB and LSB together
   absoluteCompass = headingValue / 10;
-  relativeCompass = 0;
+  relativeCompass = initialCompass - absoluteCompass;
   Serial.print("Compass:  ");
   Serial.println(relativeCompass);
 }
